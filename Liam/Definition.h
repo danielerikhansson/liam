@@ -34,7 +34,7 @@
 #define NIMH       1
 #define LIION      2
 
-#define BATTERY_TYPE LIION
+#define BATTERY_TYPE LEAD_ACID
 
 #define DEBUG_ENABLED true
 
@@ -58,7 +58,7 @@ const int NUMBER_OF_SENSORS = 2;  // Number of BWF sensors can be 1-4 depending 
 #define BWF_SELECT_B_PIN                7
 #define BUMPER                          8
 #define LIFT_SENSOR_PIN                 9
-#define LED_PIN                         13
+#define LED_PIN                         10
 #define WHEEL_MOTOR_B_PWM_PIN           11
 #define WHEEL_MOTOR_A_DIRECTION_PIN     12
 #define WHEEL_MOTOR_B_DIRECTION_PIN     13
@@ -70,7 +70,7 @@ const int NUMBER_OF_SENSORS = 2;  // Number of BWF sensors can be 1-4 depending 
 
 // CUTTER
 #define CUTTER_OVERLOAD     100
-#define CUTTER_SPINUP_TIME 4000
+#define CUTTER_SPINUP_TIME 2000
 
 // Cutter states
 const int MOWING = 0;
@@ -91,7 +91,7 @@ const int IDLE = 6;
 #pragma region BWF
 
 // BWF Detection method (true = always, false = only at wire)
-#define BWF_DETECTION_ALWAYS      true
+#define BWF_DETECTION_ALWAYS      false
 #define TIMEOUT             6000 //Time without signal before error
 #define BWF_COLLECT_SIGNAL_TIME   1000 // max time to spend looking for signal
 #define BWF_NUMBER_OF_PULSES  3
@@ -152,7 +152,7 @@ const int IDLE = 6;
 // Enable this if you need the mower to go backward until it's inside and then turn.
 // Default behavior is to turn directly when mower is outside BWF, if definition below is enabled this might help mower not to get stuck in slopes.
 // If mower is not inside within x seconds mower will stop.
-//#define GO_BACKWARD_UNTIL_INSIDE
+#define GO_BACKWARD_UNTIL_INSIDE
 #define MAX_GO_BACKWARD_TIME  5 // try to get inside for max x seconds, then stop and error.
 
 

@@ -365,18 +365,18 @@ void doDocking() {
 
   if (currentSideIsOutSide && !Sensor.isOutOfBounds(0)) {
     currentSideIsOutSide = Sensor.isOutOfBounds(0);
-    time_at_turning = millis();
+    //time_at_turning = millis();
   }
 
   // Make regular turns to avoid getting stuck on things
-  if ((millis() - time_at_turning) > TURN_INTERVAL) {
-    Mower.stop();
-    Mower.runBackward(DOCKING_WHEEL_HIGH_SPEED);
-    delay(2000);
-    Mower.stop();
-    time_at_turning = millis();
-    return;
-  }
+//  if ((millis() - time_at_turning) > TURN_INTERVAL) {
+//    Mower.stop();
+//    Mower.runBackward(DOCKING_WHEEL_HIGH_SPEED);
+//    delay(2000);
+//    Mower.stop();
+//    time_at_turning = millis();
+//    return;
+//  }
 
 #if defined __Bumper__
   if (Mower.hasBumped()) {
@@ -387,7 +387,7 @@ void doDocking() {
     if (Mower.hasBumped()) {
       Error.flag(ERROR_BUMPERSTUCK);
     }
-    time_at_turning = millis();
+    //time_at_turning = millis();
     return;
   }
 #endif
@@ -433,7 +433,7 @@ void doDocking() {
       lastOutside = millis();
       Mower.runForward(DOCKING_WHEEL_HIGH_SPEED);
     }
-    time_at_turning = millis();
+    //time_at_turning = millis();
     return;
   }
 
@@ -460,11 +460,10 @@ void doDocking() {
       Mower.runBackward(FULLSPEED);
       delay(700);
       Mower.stop();
-    }
-    else {
+    } else {
       Mower.runForward(MOWING_SPEED);
     }
-    time_at_turning = millis();
+    //time_at_turning = millis();
     return;
 
 #endif
@@ -476,9 +475,11 @@ void doDocking() {
     Mower.turnLeft(DOCKING_TURN_AFTER_TIMEOUT);
     state = LOOKING_FOR_BWF;
     Serial.println("Start look for BWF");
-    time_at_turning = millis();
+    //time_at_turning = millis();
     return;
   }
+
+  // Add if sensor(1) has not been inside for 30 seconds we are outside the BWF.
 
   // Track the BWF by compensating the wheel motor speeds
   //Sensor.select(0);
@@ -611,13 +612,8 @@ void loop() {
       break;
   }
 
-  if(millis()-lastDisplayUpdate > 5000) {
-    // olastemp = millis();
-    //Mower.stop();
+  if(millis()-lastDisplayUpdate > 10000) {
     Display.update();
-    //Mower.runForwardOverTime(SLOWSPEED, MOWING_SPEED, ACCELERATION_DURATION);
-    // Serial.print("\nprintTime : ");
-    // Serial.println(millis() -olastemp);
     lastDisplayUpdate = millis();
   }
 }

@@ -53,21 +53,23 @@ void MYDISPLAY::update()
 #if __MS9150__ || __MS5883L__ || __ADXL345__ || __MMA7455__
   print(F("Comp: "));
   print(compass->getHeading());
-#else
-  print(F("Sens: "));
-  print(F("Disabled"));
-#endif
-
-  print(F("InOut: "));
-  print(!sensor->isOutOfBounds(0));
-  print(!sensor->isOutOfBounds(1));
-
   print("\n");
-  // Row 2: Motor load
-  print(F("LMoto: "));
-  print(leftMotor->getLoad());
-  print(F(" RMoto: "));
-  print(rightMotor->getLoad());
+#else
+//  print(F("Sens: "));
+//  print(F("Disabled"));
+//  print("\n");
+#endif
+//
+//  print(F("InOut: "));
+//  print(!sensor->isOutOfBounds(0));
+//  print(!sensor->isOutOfBounds(1));
+
+//  print("\n");
+//  // Row 2: Motor load
+//  print(F("LMoto: "));
+//  print(leftMotor->getLoad());
+//  print(F(" RMoto: "));
+//  print(rightMotor->getLoad());
 
   print("\n");
   // Row 3: Battery
@@ -82,21 +84,27 @@ void MYDISPLAY::update()
   {
     case MOWING:
       print(F("MOWING"));
+      print("\n");
       break;
     case LAUNCHING:
       print(F("LAUNCHING"));
+      print("\n");
       break;
     case DOCKING:
       print(F("DOCKING"));
+      print("\n");
       break;
     case CHARGING:
       print(F("CHARGING"));
+      print("\n");
       break;
     case LOOKING_FOR_BWF:
       print(F("LOOKING"));
+      print("\n");
       break;
       case IDLE:
       print(F("IDLE"));
+      print("\n");
       break;
   }
 }

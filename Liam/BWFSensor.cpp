@@ -70,11 +70,8 @@ void BWFSENSOR::selectNext() {
     return;
   }
 
+  // Signal timout on sensor
   if (millis() - lastSwitch > BWF_COLLECT_SIGNAL_TIME) {
-    /*Serial.print(millis());
-    Serial.print(" Signal timout on sensor ");
-    Serial.print(_currentSensor);
-    Serial.println(", switching");*/
     assignIfNeeded(_currentSensor, NOSIGNAL);
     select((_currentSensor + 1) % NUMBER_OF_SENSORS);
   }
@@ -99,27 +96,15 @@ void BWFSENSOR::select(int sensornumber) {
   clearSignal();
   lastSwitch = millis();
   _switching = false;
-  // Serial.println(_currentSensor);
-  // clearSignal();
-
-  _switching = false;
-
-   //long time = millis();
-   //while (signal_status == NOSIGNAL
-   //  && millis() - time < BWF_COLLECT_SIGNAL_TIME) // max time of 200ms
-   //{
-   //  delay(1);
-   //}
-
-  // delay(200);
 }
 
 
 void BWFSENSOR::clearSignal() {
-  for (int i = 0; i < arr_length; i++)
-    arr[i] = 0;
+//  for (int i = 0; i < arr_length; i++)
+//    arr[i] = 0;
+  memset(arr, 0, arr_length);
   signal_status = NOSIGNAL;
-  //sensorValue[_currentSensor] = NOSIGNAL;
+  
   pulse_count_inside = 0;
   pulse_count_outside = 0;
   arr_count = 0;
@@ -158,10 +143,9 @@ void BWFSENSOR::readSensor() {
   if (_switching)
   {
     last_pulse = now;
-    Serial.println(">> new puls while still processing.");
     return; //Avoid data for undefined state for selection pins
   }
-  char buf[40];
+  // char buf[40];
   // Calculate the time since last pulse
   int time_since_pulse = int(now - last_pulse);
   last_pulse = now;
@@ -175,7 +159,6 @@ void BWFSENSOR::readSensor() {
 
     // Check if the entire pulse train has been batched
     if (pulse_count_inside >= sizeof(inside_code)/sizeof(inside_code[0])) {
-      //sensorValue[_currentSensor] = INSIDE;
       signal_status = INSIDE;
       assignIfNeeded(_currentSensor, signal_status);
       last_match = millis();
@@ -189,7 +172,6 @@ void BWFSENSOR::readSensor() {
   if (abs(pulse_length-outside_code[pulse_count_outside]) < 2) {
     pulse_count_outside++;
     if (pulse_count_outside >= sizeof(outside_code)/sizeof(outside_code[0])) {
-      //sensorValue[_currentSensor] = OUTSIDE;
       signal_status = OUTSIDE;
       assignIfNeeded(_currentSensor, signal_status);
       last_match = millis();
@@ -201,12 +183,12 @@ void BWFSENSOR::readSensor() {
   }
 
 
-
+#ifdef DEBUG_ENABLED
   // Store the received code for debug output
   arr[arr_count++] = pulse_length;
   if (arr_count>arr_length) arr_count=0;
-//sensorValue[_currentSensor] = isOutOfBounds();
-//select((_currentSensor+1) % NUMBER_OF_SENSORS);
+#endif
+
   selectNext();
 }
 

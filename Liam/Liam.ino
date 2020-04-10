@@ -166,7 +166,7 @@ void setupInterrupt() {
   sei();//allow interrupts
 }
 // Interrupt is called once a millisecond, looks for any new GPS data, and stores it
-SIGNAL(TIMER0_COMPA_vect)
+ISR(TIMER0_COMPA_vect)
 {
    doInterruptThings();
 }

@@ -148,12 +148,11 @@ int CONTROLLER::waitWhileInside(int duration) {
 
 int CONTROLLER::GoBackwardUntilInside (int sensorNumber) {
 #ifdef GO_BACKWARD_UNTIL_INSIDE
-  int counter=MAX_GO_BACKWARD_TIME;
-  //Mover has just stoped. Let it pause for a second.
+  //Mover has just stopped. Let it pause for a second.
   stop();
   long now = millis();
   long timeout = now + (MAX_GO_BACKWARD_TIME * 1000);
-  // while(!sensor->isOutOfBounds()==false)
+
   while(sensor->isOutOfBounds(sensorNumber))
   {
     runBackwardOverTime(SLOWSPEED, FULLSPEED, ACCELERATION_DURATION);
@@ -276,8 +275,7 @@ int CONTROLLER::compensateSpeedToCompassHeading() {
 
   if (compass->headingVsTarget() < 0) {
     rms = 0.9*rms;
-  }
-  else if (compass->headingVsTarget() > 0) {
+  } else if (compass->headingVsTarget() > 0) {
     lms = 0.9*lms;
   }
 
@@ -289,19 +287,13 @@ boolean CONTROLLER::wheelsAreOverloaded() {
 	long now = millis();
 	int l_load = 0;
 	int r_load = 0;
-	int l_load_limit = 0;
-	int r_load_limit = 0;
-	int counter = 0;
-	while (millis() - now <= 200)
-	{
+  
+	while (millis() - now <= 100) {
     l_load = leftMotor->isAtTargetSpeed() ? leftMotor->getLoad() : 0;
-    l_load_limit = WHEELMOTOR_OVERLOAD;// *max(60, abs(leftMotor->getSpeed())) / MOWING_SPEED;
-
 		r_load = rightMotor->isAtTargetSpeed() ? rightMotor->getLoad() : 0;
-    r_load_limit = WHEELMOTOR_OVERLOAD;// *max(60, abs(rightMotor->getSpeed())) / MOWING_SPEED;
-		/*counter++;*/
+   
 		delay(1);
-		if (l_load  < l_load_limit && r_load < r_load_limit)
+		if (l_load < WHEELMOTOR_OVERLOAD && r_load < WHEELMOTOR_OVERLOAD)
 		{
 			return false;
     }

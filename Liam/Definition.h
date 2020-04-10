@@ -27,7 +27,7 @@
 #define BRUSHED    1
 #define NIDEC      2
 
-#define CUTTER_MOTOR_TYPE BRUSHED
+#define CUTTER_MOTOR_TYPE NIDEC
 
 // Battery
 #define LEAD_ACID  0

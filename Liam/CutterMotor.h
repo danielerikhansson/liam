@@ -11,7 +11,7 @@
 #ifndef _CUTTERMOTOR_H_
 #define _CUTTERMOTOR_H_
 
-#include <Servo.h>
+//#include <Servo.h>
 #include <Arduino.h>
 
 class CUTTERMOTOR {
@@ -36,7 +36,7 @@ class CUTTERMOTOR {
     int loadpin;
     int speed;
     int overload_level;
-    Servo cutter;
+//    Servo cutter;
 
 
     int ot_setTime = 0;

@@ -29,13 +29,13 @@ CUTTERMOTOR::CUTTERMOTOR(int type_, int pwmpin_, int loadpin_) {
 
 void CUTTERMOTOR::initialize() {
   // Initialize if brushless with ESC
-  if (type == BRUSHLESS) {
-    cutter.attach(pwmpin);
-    cutter.writeMicroseconds(2000);
-    delay(400);
-    cutter.writeMicroseconds(1000);
-    delay(2000);
-  }
+//  if (type == BRUSHLESS) {
+//    cutter.attach(pwmpin);
+//    cutter.writeMicroseconds(2000);
+//    delay(400);
+//    cutter.writeMicroseconds(1000);
+//    delay(2000);
+//  }
   setSpeedOverTime(0,0);
 }
 
@@ -80,17 +80,20 @@ void CUTTERMOTOR::setSpeed(int setspeed) {
   if (speed < 0) speed = 0;
 
   int pwm;
-  if (type == BRUSHLESS)
-    pwm = 1000 + 1000 * speed/100;
-  else if (type == BRUSHED)
-    pwm = 255 * speed/100;
-  else if (type == NIDEC)
-    pwm = 255 - 255 * speed/100;
+//  if (type == BRUSHLESS)
+//    pwm = 1000 + 1000 * speed/100;
+//  else if (type == BRUSHED)
+//    pwm = 255 * speed/100;
+//  else if (type == NIDEC)
+//    pwm = 255 * speed/100;
+//
+//  if (type == BRUSHLESS)
+//    cutter.writeMicroseconds(pwm);
+//  else
+//    analogWrite(pwmpin, pwm);
 
-  if (type == BRUSHLESS)
-    cutter.writeMicroseconds(pwm);
-  else
-    analogWrite(pwmpin, pwm);
+  pwm = 255 * speed/100;
+  analogWrite(pwmpin, pwm);
 }
 
 

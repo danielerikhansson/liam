@@ -100,8 +100,6 @@ void BWFSENSOR::select(int sensornumber) {
 
 
 void BWFSENSOR::clearSignal() {
-//  for (int i = 0; i < arr_length; i++)
-//    arr[i] = 0;
   memset(arr, 0, arr_length);
   signal_status = NOSIGNAL;
  
@@ -135,17 +133,17 @@ bool BWFSENSOR::hasNoSignal() {
 }
 
 
-// This function is run each time the BWF pin gets a pulse
-// For accuracy, this function should be kept as fast as possible
+/* 
+ *  This function is run each time the BWF pin gets a pulse. 
+ *  For accuracy, this function should be kept as fast as possible.
+ */
 void BWFSENSOR::readSensor() {
-  //bool needOneMoreRun = false;
   long now = micros();
   if (_switching)
   {
     last_pulse = now;
     return; //Avoid data for undefined state for selection pins
   }
-  // char buf[40];
   // Calculate the time since last pulse
   int time_since_pulse = int(now - last_pulse);
   last_pulse = now;
@@ -171,6 +169,7 @@ void BWFSENSOR::readSensor() {
   // Check if the latest pulse fits the code for outside
   if (abs(pulse_length-outside_code[pulse_count_outside]) < 2) {
     pulse_count_outside++;
+
     if (pulse_count_outside >= sizeof(outside_code)/sizeof(outside_code[0])) {
       signal_status = OUTSIDE;
       assignIfNeeded(_currentSensor, signal_status);

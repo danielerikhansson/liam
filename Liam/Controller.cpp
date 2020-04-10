@@ -292,11 +292,11 @@ boolean CONTROLLER::wheelsAreOverloaded() {
     l_load = leftMotor->isAtTargetSpeed() ? leftMotor->getLoad() : 0;
 		r_load = rightMotor->isAtTargetSpeed() ? rightMotor->getLoad() : 0;
    
-		delay(1);
 		if (l_load < WHEELMOTOR_OVERLOAD && r_load < WHEELMOTOR_OVERLOAD)
 		{
 			return false;
     }
+//    delay(1); // Unnecessary since there is delay in getLoad()
   }
 
 	return true;

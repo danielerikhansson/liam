@@ -43,10 +43,10 @@ class WHEELMOTOR {
     int smoothness_delay;
 
     unsigned long ot_setTime = 0;
-	int ot_currentTargetValue = 0;
-	int ot_startingValue = 0;
-	int ot_currentValue = 0;
-  bool _atTargetSpeed;
+	  int ot_currentTargetValue = 0;
+	  int ot_startingValue = 0;
+	  int ot_currentValue = 0;
+    bool _atTargetSpeed;
 };
 
 #endif /* _WHEELMOTOR_H_ */

@@ -104,7 +104,7 @@ void BWFSENSOR::clearSignal() {
 //    arr[i] = 0;
   memset(arr, 0, arr_length);
   signal_status = NOSIGNAL;
-  
+ 
   pulse_count_inside = 0;
   pulse_count_outside = 0;
   arr_count = 0;

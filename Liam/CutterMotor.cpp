@@ -48,24 +48,17 @@ int CUTTERMOTOR::setSpeedOverTime(int targetSpeed, int actionTime) {
   }
 
   if (targetSpeed == ot_currentValue) {
-    //Serial.print("Speed is already set: ");
-    //Serial.println(targetSpeed);
     return 0;
   }
 
 
   int newValue;
   if (actionTime == 0) {
-
     newValue = targetSpeed;
-  }
-  else {
-    if (ot_setTime + actionTime < _now) {
-      newValue = targetSpeed;
-    }
-    else {
-      newValue = map(_now, ot_setTime, ot_setTime + actionTime, ot_startingValue, targetSpeed);
-    }
+  } else if (ot_setTime + actionTime < _now) {
+    newValue = targetSpeed;
+  } else {
+    newValue = map(_now, ot_setTime, ot_setTime + actionTime, ot_startingValue, targetSpeed);
   }
 
   setSpeed(newValue);

@@ -61,7 +61,7 @@
 #include "Sens9150.h"
 #include "Definition.h"
 
-#ifdef DEBUG_ENABLED
+#if DEBUG_ENABLED
   #include "SetupDebug.h"
 #endif
 
@@ -101,7 +101,7 @@ MOTIONSENSOR Compass;
 // Controller (pass adresses to the motors and sensors for the controller to operate on)
 CONTROLLER Mower(&leftMotor, &rightMotor, &CutterMotor, &Sensor, &Compass);
 
-#ifdef DEBUG_ENABLED
+#if DEBUG_ENABLED
 SETUPDEBUG SetupAndDebug(&Mower, &leftMotor, &rightMotor, &CutterMotor, &Sensor, &Compass, &Battery);
 #endif
 
@@ -184,7 +184,7 @@ void doInterruptThings() {
 // ****************** SETUP ******************************************
 void setup() {
   // Fast communication on the serial port for all terminal messages
-#ifdef DEBUG_ENABLED
+#if DEBUG_ENABLED
   Serial.begin(115200);
 #endif
 
@@ -220,12 +220,12 @@ void setup() {
   Display.print(F(VERSION_STRING "\n"));
   Display.print(__DATE__ " " __TIME__ "\n");
 
-  #ifdef DEBUG_ENABLED
+  #if DEBUG_ENABLED
   Serial.println(F("----------------"));
   Serial.println(F("Send D to enter setup and debug mode"));
   #endif
   delay(5000);
-  #ifdef DEBUG_ENABLED
+  #if DEBUG_ENABLED
   state = SetupAndDebug.tryEnterSetupDebugMode(0);
   #endif
   Display.clear();
@@ -234,8 +234,7 @@ void setup() {
     if (Battery.isBeingCharged()) {
       state = CHARGING;
       Mower.stopCutter();
-    }
-    else {
+    } else {
       state = MOWING;
     }
   }
@@ -601,7 +600,7 @@ void loop() {
 
   //long looptime = millis(); // Unused?
 
-#ifdef DEBUG_ENABLED
+#if DEBUG_ENABLED
   if((state = SetupAndDebug.tryEnterSetupDebugMode(state)) == SETUP_DEBUG)
     return;
 #endif

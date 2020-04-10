@@ -183,7 +183,7 @@ void BWFSENSOR::readSensor() {
   }
 
 
-#ifdef DEBUG_ENABLED
+#if DEBUG_ENABLED
   // Store the received code for debug output
   arr[arr_count++] = pulse_length;
   if (arr_count>arr_length) arr_count=0;

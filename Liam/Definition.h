@@ -38,6 +38,10 @@
 
 #define DEBUG_ENABLED true
 
+// To set registers
+#define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
+#define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
+
 const int NUMBER_OF_SENSORS = 2;  // Number of BWF sensors can be 1-4 depending on shield default 2 left and right front.
 
 // Pin setup following Morgan 1.5 shield and up

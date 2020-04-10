@@ -162,7 +162,14 @@ void doInterruptThings() {
 // ****************** SETUP ******************************************
 void setup() {
   // Fast communication on the serial port for all terminal messages
+#ifdef DEBUG_ENABLED
   Serial.begin(115200);
+#endif
+
+// set prescaler of ADC to 16
+  sbi(ADCSRA, ADPS2);
+  cbi(ADCSRA, ADPS1);
+  cbi(ADCSRA, ADPS0);
 
   // Configure all the pins for input or output
   Defaults.definePinsInputOutput();
@@ -482,7 +489,6 @@ void doDocking() {
   // Add if sensor(1) has not been inside for 30 seconds we are outside the BWF.
 
   // Track the BWF by compensating the wheel motor speeds
-  //Sensor.select(0);
   Mower.adjustMotorSpeeds(Sensor.isOutOfBounds(0));
 }
 void doWait()
@@ -571,21 +577,14 @@ void loop() {
   static long lastDisplayUpdate = 0;
   static int previousState;
 
-  long looptime = millis();
+  //long looptime = millis(); // Unused?
 
+#ifdef DEBUG_ENABLED
   if((state = SetupAndDebug.tryEnterSetupDebugMode(state)) == SETUP_DEBUG)
     return;
+#endif
 
   Battery.updateVoltage();
-
-
-  // int startingSensor = Sensor.getCurrentSensor();
-  // Check state of all sensors
-  // for(int i = startingSensor; i < startingSensor + NUMBER_OF_SENSORS; i++) {
-
-  //   Sensor.select(i % NUMBER_OF_SENSORS);
-  //   Sensor.sensorOutside[Sensor.getCurrentSensor()] = Sensor.isOutOfBounds();
-  // }
 
   // Safety checks
   checkIfFlipped();

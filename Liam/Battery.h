@@ -18,7 +18,7 @@
 #define LIIONEMPTY      10400
 #define NIMHFULL        14500
 #define NIMHEMPTY       11500
-#define LEADACIDFULL    13300
+#define LEADACIDFULL    14500
 #define LEADACIDEMPTY   12000
 
 // Running average sample size

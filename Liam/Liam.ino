@@ -70,7 +70,7 @@ int state;
 long time_at_turning = millis();
 int extraTurnAngle = 0;
 
-long olastemp = millis();
+//long olastemp = millis(); // Unused?
 // Set up all the defaults (check the Definition.h file for all default values)
 DEFINITION Defaults;
 

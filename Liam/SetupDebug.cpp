@@ -282,7 +282,7 @@ void SETUPDEBUG::printStatus() {
   battery->resetVoltage();
   Serial.print(battery->getVoltage());
   Serial.print(F(" Dock: "));
-  Serial.print(battery->isBeingCharged());
+  Serial.println(battery->isBeingCharged());
 }
 
 void SETUPDEBUG::turnRight() {

@@ -147,23 +147,23 @@ void setupInterrupt() {
   //TIMSK0 |= (1 << OCIE0A);
 
   //sei();//allow interrupts
-
-  cli();//stop interrupts
-
-  //set timer1 interrupt at 1 Hz
-  TCCR1A = 0;// set entire TCCR1A register to 0
-  TCCR1B = 0;// same for TCCR1B
-  TCNT1  = 0;//initialize counter value to 0
-  // set compare match register for 1hz increments
-  OCR1A = 15624;// = (16*10^6) / (1*1024) - 1 (must be <65536)
-  // turn on CTC mode
-  TCCR1B |= (1 << WGM12);
-  // Set CS10 and CS12 bits for 1024 prescaler
-  TCCR1B |= (1 << CS12) | (1 << CS10);  
-  // enable timer compare interrupt
-  TIMSK1 |= (1 << OCIE1A);
-
-  sei();//allow interrupts
+//
+//  cli();//stop interrupts
+//
+//  //set timer1 interrupt at 1 Hz
+//  TCCR1A = 0;// set entire TCCR1A register to 0
+//  TCCR1B = 0;// same for TCCR1B
+//  TCNT1  = 0;//initialize counter value to 0
+//  // set compare match register for 1hz increments
+//  OCR1A = 15624;// = (16*10^6) / (1*1024) - 1 (must be <65536)
+//  // turn on CTC mode
+//  TCCR1B |= (1 << WGM12);
+//  // Set CS10 and CS12 bits for 1024 prescaler
+//  TCCR1B |= (1 << CS12) | (1 << CS10);  
+//  // enable timer compare interrupt
+//  TIMSK1 |= (1 << OCIE1A);
+//
+//  sei();//allow interrupts
 }
 // Interrupt is called once a millisecond, looks for any new GPS data, and stores it
 ISR(TIMER0_COMPA_vect)
@@ -171,9 +171,11 @@ ISR(TIMER0_COMPA_vect)
    doInterruptThings();
 }
 
-ISR(TIMER1_COMPA_vect){ // Update battery voltage at 1 Hz
-  Battery.updateVoltage();
-}
+//ISR(TIMER1_COMPA_vect){ // Update battery voltage at 1 Hz
+//  Battery.updateVoltage();
+//  Serial.print(F("Battery: "));
+//  Serial.println(Battery.getVoltage());
+//}
 
 
 void doInterruptThings() {
@@ -189,9 +191,9 @@ void setup() {
 #endif
 
 // set prescaler of ADC to 16
-  sbi(ADCSRA, ADPS2);
-  cbi(ADCSRA, ADPS1);
-  cbi(ADCSRA, ADPS0);
+//  sbi(ADCSRA, ADPS2);
+//  cbi(ADCSRA, ADPS1);
+//  cbi(ADCSRA, ADPS0);
 
   // Configure all the pins for input or output
   Defaults.definePinsInputOutput();
@@ -605,8 +607,7 @@ void loop() {
     return;
 #endif
 
-// Is now used on 1 Hz timer1 interrupt instead 
-//  Battery.updateVoltage();
+  Battery.updateVoltage();
 
   // Safety checks
   checkIfFlipped();

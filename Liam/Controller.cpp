@@ -288,7 +288,7 @@ boolean CONTROLLER::wheelsAreOverloaded() {
 	int l_load = 0;
 	int r_load = 0;
   
-	while (millis() - now <= 100) {
+	while (millis() - now <= 50) {
     l_load = leftMotor->isAtTargetSpeed() ? leftMotor->getLoad() : 0;
 		r_load = rightMotor->isAtTargetSpeed() ? rightMotor->getLoad() : 0;
    

@@ -17,6 +17,9 @@
 #define INSIDE    1
 #define NOSIGNAL  0
 #define OUTSIDE   -1
+#define FOLLOW_INSIDE    2
+#define FOLLOW_OUTSIDE    3
+
 
 // BWF Code for timout and no signal (in milliseconds)
 #define TIMEOUT_DELAY    20000
@@ -35,6 +38,9 @@ class BWFSENSOR {
 
     bool isInside(int sensornumber);
     bool isOutside(int sensornumber);
+    bool isInsideFollow(int sensornumber);
+    bool isOutsideFollow(int sensornumber);
+
 	  bool isOutOfBounds(int sensornumber);
     bool isTimedOut();
     bool hasNoSignal();
@@ -48,18 +54,23 @@ class BWFSENSOR {
   private:
     String getSignalStatusName(int signalStatus);
     void assignIfNeeded(int sensor, int signalStatus);
-
+    int getLastKnownSensorValue(int sensornumber);
+    int lastKnownSensorValue[NUMBER_OF_SENSORS];
     int sensorValue[NUMBER_OF_SENSORS];
     int getCurrentSensor();
     void clearSignal();
     // BWF Code for inside and outside the fence
     static int inside_code[];
     static int outside_code[];
+    static int follow_inside_code[];
+    static int follow_outside_code[];
     int _currentSensor = 0;
     const static int pulse_unit_length = 100;
 
     int pulse_count_inside;
     int pulse_count_outside;
+    int pulse_count_follow_inside;
+    int pulse_count_follow_outside;
 
     int selpin_A;
     int selpin_B;

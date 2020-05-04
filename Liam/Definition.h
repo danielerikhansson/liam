@@ -101,8 +101,12 @@ const int IDLE = 6;
 #define BWF_NUMBER_OF_PULSES  3
 
 // BWF Code for inside and outside
-#define INSIDE_BWF          86
+#define INSIDE_BWF          85
 #define OUTSIDE_BWF         5
+
+// BWF to follow home
+#define FOLLOW_BWF_INSIDE   170
+#define FOLLOW_BWF_OUTSIDE  5
 
 #pragma endregion BWF
 

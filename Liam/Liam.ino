@@ -289,25 +289,20 @@ void checkIfLifted() {
 #endif
 }
 
+/*
+ * Will check both sensors to see if they are outside. 
+ * If they are outside get back on track, otherwise error.
+ *
+ */
 
-// ***************** MOWING ******************************************
-void doMowing() {
-  if (Battery.mustCharge()) {
-    state = LOOKING_FOR_BWF;
-    return;
-  }
-
-  // Make regular turns to avoid getting stuck on things
-  if ((millis() - time_at_turning) > TURN_INTERVAL) {
-    randomTurn(true);
-    return;
-  }
-
-  // Check if any sensor is outside
+void checkIfOutside() {
+    // Check if any sensor is outside
   for(int i = 0; i < 2; i++) {
-    // If sensor is inside, don't do anything
-    if(!Sensor.isOutOfBounds(i))
+    // If sensor is inside, check next
+    if(!Sensor.isOutOfBounds(i)) {
       continue;
+    }
+
     // ... otherwise ...
 
     Mower.stop();
@@ -317,7 +312,7 @@ void doMowing() {
         Error.flag(err);
 
 
-      if (millis()- time_at_turning < 3000) {
+      if (millis() - time_at_turning < 3000) {
         extraTurnAngle = extraTurnAngle + 10;
       }
       else {
@@ -351,6 +346,24 @@ void doMowing() {
     Compass.setNewTargetHeading();
     return; //Stale sensor data after previous delays
   }
+}
+
+
+// ***************** MOWING ******************************************
+void doMowing() {
+  if (Battery.mustCharge()) {
+    state = LOOKING_FOR_BWF;
+    return;
+  }
+
+  // Make regular turns to avoid getting stuck on things
+  if ((millis() - time_at_turning) > TURN_INTERVAL) {
+    randomTurn(true);
+    return;
+  }
+
+  // Check if sensors outside BWF
+  checkIfOutside();
 
   // Avoid obstacles
   Mower.turnIfObstacle();
@@ -391,8 +404,8 @@ void doDocking() {
 
   Mower.stopCutter();
 
-  if (currentSideIsOutSide && !Sensor.isOutOfBounds(0)) {
-    currentSideIsOutSide = Sensor.isOutOfBounds(0);
+  if (currentSideIsOutSide && !Sensor.isOutsideFollow(0)) {
+    currentSideIsOutSide = Sensor.isOutsideFollow(0);
     //time_at_turning = millis();
   }
 
@@ -420,8 +433,9 @@ void doDocking() {
   }
 #endif
 
-  if(Sensor.isOutOfBounds(0))
+  if(Sensor.isOutsideFollow(0)) {
     lastOutside = millis();
+  }
 
   if(Battery.isBeingCharged()) {
     Mower.stop();
@@ -430,7 +444,8 @@ void doDocking() {
   }
 
   // If the mower hits something along the BWF
-  if(Mower.wheelsAreOverloaded()) {
+  // Don't use this right now to simplify
+  if(Mower.wheelsAreOverloaded() && 0) {
     if(millis() - lastCollision > 10000)
       collisionCount = 0;
     collisionCount++;
@@ -466,7 +481,7 @@ void doDocking() {
   }
 
   // Check regularly if right sensor is outside
-  if (Sensor.isOutOfBounds(1)) {
+  if (Sensor.isOutsideFollow(1)) {
 
 #ifdef DOCKING_BACK_WHEN_INNER_SENSOR_IS_OUT
     Mower.stop();
@@ -483,7 +498,7 @@ void doDocking() {
     while (millis() - turnstart < 1500 && Sensor.isOutOfBounds(1)) {
       Mower.turnRight(20);
     }
-    if (Sensor.isOutOfBounds(1)) {
+    if (Sensor.isOutsideFollow(1)) {
       Mower.stop();
       Mower.runBackward(FULLSPEED);
       delay(700);
@@ -510,7 +525,7 @@ void doDocking() {
   // Add if sensor(1) has not been inside for 30 seconds we are outside the BWF.
 
   // Track the BWF by compensating the wheel motor speeds
-  Mower.adjustMotorSpeeds(Sensor.isOutOfBounds(0));
+  Mower.adjustMotorSpeeds(Sensor.isOutsideFollow(0));
 }
 void doWait()
 {
@@ -533,7 +548,7 @@ void doLookForBWF() {
   Mower.stopCutter();
 
   // If sensor is outside, then the BWF has been found
-  if(Sensor.isOutOfBounds(0) || Sensor.isOutOfBounds(1)) {
+  if(Sensor.isOutsideFollow(0) || Sensor.isOutsideFollow(1)) {
     state = DOCKING;
     time_at_turning = millis();
     return;
@@ -544,6 +559,9 @@ void doLookForBWF() {
     randomTurn(true);
     return;
   }
+
+  // Check if sensors outside BWF
+  checkIfOutside();
 
   Mower.runForwardOverTime(SLOWSPEED, MOWING_SPEED, ACCELERATION_DURATION);
   Mower.turnIfObstacle();

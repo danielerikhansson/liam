@@ -126,6 +126,7 @@ const int IDLE = 6;
 // Do you have a Sensor? If so, uncomment one of these lines
 //#define __MS5883L__ true
 //#define __MS9150__ true
+#define __MS6050__ true
 
 // Do you have a Display? If so, uncomment one of these lines
 //#define __OLED__

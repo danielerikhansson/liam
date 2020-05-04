@@ -59,6 +59,7 @@
 #include "MotionSensor.h"
 #include "Sens5883L.h"
 #include "Sens9150.h"
+#include "Sens6050.h"
 #include "Definition.h"
 
 #if DEBUG_ENABLED
@@ -94,6 +95,8 @@ MS5883L Compass;
 MS9150 Compass;
 #elif defined __ADXL345__
 MS9150 Compass;
+#elif defined __MS6050__
+MS6050 Compass;
 #else
 MOTIONSENSOR Compass;
 #endif

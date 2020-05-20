@@ -67,6 +67,8 @@ class CONTROLLER {
 
     int turnLeft(int degrees);
     int turnRight(int degrees);
+    void turnLeftVoid(void);
+    void turnRightVoid(void);
 
   private:
     WHEELMOTOR* leftMotor;

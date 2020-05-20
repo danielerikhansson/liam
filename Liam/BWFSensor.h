@@ -35,7 +35,7 @@ class BWFSENSOR {
     void select(int sensornumber);
     void SetManualSensorSelect(bool useManualMode);
 
-
+    int getSensorValue(int sensornumber);
     bool isInside(int sensornumber);
     bool isOutside(int sensornumber);
     bool isInsideFollow(int sensornumber);

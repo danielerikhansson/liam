@@ -112,6 +112,10 @@ void BWFSENSOR::clearSignal() {
 }
 
 
+int BWFSENSOR::getSensorValue(int sensornumber) {
+  return sensorValue[sensornumber];
+}
+
 bool BWFSENSOR::isInside(int sensornumber) {
   return (sensorValue[sensornumber] == INSIDE);
 }

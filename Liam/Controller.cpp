@@ -111,6 +111,19 @@ int CONTROLLER::turnLeft(int angle) {
 }
 
 
+void CONTROLLER::turnRightVoid() {
+    int l = leftMotor->setSpeedOverTime(default_dir_fwd * 50, 0);
+    int r = rightMotor->setSpeedOverTime(-1 * default_dir_fwd * 50, 0);
+    return;
+}
+
+void CONTROLLER::turnLeftVoid() {
+    int l = leftMotor->setSpeedOverTime(-1 * default_dir_fwd * 50, 0);
+    int r = rightMotor->setSpeedOverTime(default_dir_fwd * 50, 0);
+    return;
+}
+
+
 
 int CONTROLLER::waitWhileChecking(int duration) {
 

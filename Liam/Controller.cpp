@@ -238,7 +238,7 @@ void CONTROLLER::adjustMotorSpeeds(bool isOutOfBounds) {
   int shortTime = DOCKING_TIME_TO_HIGH_SPEED;
   int longTime = DOCKING_TIME_TO_SLOW_SPEED;
 
-  if (isOutOfBounds) {
+  if (!isOutOfBounds) {
 	  //Serial.println("Adjust to out of bounds");
     lms = highSpeed;
 	ltime = shortTime;

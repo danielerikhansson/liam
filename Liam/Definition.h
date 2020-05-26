@@ -148,9 +148,10 @@ const int IDLE = 6;
 #define FLIPANGLE           75
 
 // Motor Speeds
-#define MOWING_SPEED 100
-#define FULLSPEED 100
-#define SLOWSPEED           30
+#define MOWING_SPEED          100
+#define FULLSPEED             100
+#define MEDIUM_SPEED          70
+#define SLOWSPEED             30
 #define CUTTERSPEED           100
 #define ACCELERATION_DURATION 400
 
@@ -166,7 +167,7 @@ const int IDLE = 6;
 
 //Settings for docking behavour. Alter these to adapt to your mower behavour at docking time
 #define DOCKING_WHEEL_HIGH_SPEED 90                //Speed for the fast wheel when docking
-#define DOCKING_WHEEL_LOW_SPEED 25                  //Speed for the slower wheel when docking
+#define DOCKING_WHEEL_LOW_SPEED 30                  //Speed for the slower wheel when docking
 #define DOCKING_TIME_TO_SLOW_SPEED 0             //Time used for the slower wheel to slow down to its target speed: original 1000
 #define DOCKING_TIME_TO_HIGH_SPEED 0               //Time used for the fast wheel to speed up to its target speed: original 10
 #define DOCKING_INSIDE_TIMEOUT 10000                //Time to spend continously on the inside of the BWF before restarting state LOOK_FOR_BWF

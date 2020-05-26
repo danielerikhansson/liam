@@ -67,8 +67,6 @@
 
 // Global variables
 int state;
-int bwf_start_signal;
-bool bwf_found;
 long time_at_turning = millis();
 int extraTurnAngle = 0;
 
@@ -245,6 +243,7 @@ void setup() {
 // TODO: This should probably be in Controller
 void randomTurn(bool goBack) {
   if(goBack) {
+    Mower.stop();
     Mower.runBackward(FULLSPEED);
     delay(2000);
   }
@@ -385,11 +384,10 @@ void doMowing() {
 // ***************** LAUNCHING ***************************************
 void doLaunching() {
   // Back out of charger, turn and start mowing
-  Mower.runBackward(FULLSPEED);
+  Mower.runBackward(MEDIUM_SPEED);
   delay(5000);
   Mower.stop();
   Mower.turnRight(90);
-  //randomTurn(false);
 
   Battery.resetVoltage();
   time_at_turning = millis();
@@ -398,38 +396,43 @@ void doLaunching() {
 
 // ***************** DOCKING *****************************************
 void doDocking() {
-  static int collisionCount = 0;
-  static long lastCollision = 0;
-  static long lastOutside = 0;
-  static bool currentSideIsOutSide = true;
+//  static int collisionCount = 0;
+//  static long lastCollision = 0;
+
+  static long bwf_last_switch = 0;
+  static int bwf_last_state = 0;
 
   Sensor.SetManualSensorSelect(true);
   Sensor.select(0);
 
   Mower.stopCutter();
 
-  if (currentSideIsOutSide && !Sensor.isOutsideFollow(0)) {
-    currentSideIsOutSide = Sensor.isOutsideFollow(0);
-    //time_at_turning = millis();
-  }
-
-  // Make regular turns to avoid getting stuck on things
-//  if ((millis() - time_at_turning) > TURN_INTERVAL) {
-//    Mower.stop();
-//    Mower.runBackward(DOCKING_WHEEL_HIGH_SPEED);
-//    delay(2000);
-//    Mower.stop();
-//    time_at_turning = millis();
-//    return;
-//  }
-
-  if(Sensor.isOutsideFollow(0)) {
-    lastOutside = millis();
-  }
-
-  if(Battery.isBeingCharged()) {
+  if( Battery.isBeingCharged() ) {
     Mower.stop();
     state = CHARGING;
+    return;
+  }
+  int bwf_current_state = 0;
+  if( Sensor.isOutsideFollow(0) ) {
+    bwf_current_state = FOLLOW_OUTSIDE;
+  } else if( Sensor.isInsideFollow(0) ) {
+    bwf_current_state = FOLLOW_INSIDE;
+  }
+
+  if( bwf_current_state != bwf_last_state ){
+    bwf_last_state = bwf_current_state;
+    bwf_last_switch = millis();
+  }
+
+
+    // If no switch has occoured for a while, we have probably lost the bwf.
+  if( (millis() - bwf_last_switch) > DOCKING_INSIDE_TIMEOUT ) {
+    Mower.stop();
+    state = LOOKING_FOR_BWF;
+    Serial.println("Start look for BWF");
+    bwf_last_state = 0;
+    Sensor.SetManualSensorSelect(false);
+    time_at_turning = millis();
     return;
   }
 
@@ -463,59 +466,12 @@ void doDocking() {
 //      Mower.turnRight(70);
 //      Mower.stop();
 //      collisionCount = 0;
-//      lastOutside = millis();
 //      Mower.runForward(DOCKING_WHEEL_HIGH_SPEED);
 //    }
 //    //time_at_turning = millis();
 //    return;
 //  }
 
-  // Check regularly if right sensor is outside
-//  if (Sensor.isOutsideFollow(1)) {
-//
-//#ifdef DOCKING_BACK_WHEN_INNER_SENSOR_IS_OUT
-//    Mower.stop();
-//    Mower.runBackward(FULLSPEED);
-//    delay(500);
-//    Mower.stop();
-//    Mower.turnRight(DOCKING_TURN_ANGLE_AFTER_BACK_UP);
-//    Mower.stop();
-//    Mower.runForward(DOCKING_WHEEL_HIGH_SPEED);
-//    time_at_turning = millis();
-//    lastOutside = millis();
-//#else
-//    long turnstart = millis();
-//    while (millis() - turnstart < 1500 && Sensor.isOutOfBounds(1)) {
-//      Mower.turnRight(20);
-//    }
-//    if (Sensor.isOutsideFollow(1)) {
-//      Mower.stop();
-//      Mower.runBackward(FULLSPEED);
-//      delay(700);
-//      Mower.stop();
-//    } else {
-//      Mower.runForward(MOWING_SPEED);
-//    }
-//    //time_at_turning = millis();
-//    return;
-//
-//#endif
-//  }
-
-  // If left sensor has been inside fence for a long time
-  // This is not applicable
-  if(((millis() - lastOutside) > DOCKING_INSIDE_TIMEOUT) && 0) {
-    Mower.stop();
-    Mower.turnLeft(DOCKING_TURN_AFTER_TIMEOUT);
-    state = LOOKING_FOR_BWF;
-    Serial.println("Start look for BWF");
-
-    Sensor.SetManualSensorSelect(false);
-    //time_at_turning = millis();
-    return;
-  }
-
-  // Add if sensor(0) has not switched for 10 seconds we have lost the bwf.
 
   // Track the BWF by compensating the wheel motor speeds
   Mower.adjustMotorSpeeds(Sensor.isOutsideFollow(0));
@@ -538,13 +494,14 @@ void doWait()
 }
 
 void doLookForBWF() {
+  static int bwf_start_signal = 0;
+
   Mower.stopCutter();
-  Mower.runForwardOverTime(SLOWSPEED, MOWING_SPEED, ACCELERATION_DURATION);
+  Mower.runForward(MOWING_SPEED);
 
   // If sensor is outside or inside, then the BWF has been found
   if(Sensor.isOutsideFollow(0) || Sensor.isInsideFollow(0)) {
     Serial.print(F("BWF found: "));
-    bwf_found = true;
     bwf_start_signal = Sensor.getSensorValue(0);
     Serial.println(bwf_start_signal);
 
@@ -554,7 +511,6 @@ void doLookForBWF() {
     while(Sensor.getSensorValue(0) == bwf_start_signal) {
 
       if ((millis() - start_of_while) > 5000 ) {
-        bwf_found = false;
         bwf_start_signal = 0;
         Serial.println("Timeout");
         return;
@@ -562,41 +518,36 @@ void doLookForBWF() {
     }
 
     Serial.println(F("BWF crossed"));
-    delay(400); // Try to center the mower of the wire.
+    delay(300); // Try to center the mower of the wire.
     Mower.stop();
     delay(100);
     start_of_while = millis();
     if ( bwf_start_signal == FOLLOW_OUTSIDE ) {
-      Serial.println(F("Turn left"));
-      Mower.turnLeftVoid();
+      Serial.println(F("Turn right"));
+      Mower.turnRightVoid();
       while(Sensor.isInsideFollow(0)) {
         delay(1);
+
         if ((millis() - start_of_while) > 5000 ) {
-          bwf_found = false;
           bwf_start_signal = 0;
-          Serial.println("Timeout");
           return;
         }
       }
-      Serial.println(F("Turn left done"));
     } else {
-      Serial.println(F("Turn right"));
-      Mower.turnRightVoid();
+      Serial.println(F("Turn left"));
+      Mower.turnLeftVoid();
       while(Sensor.isOutsideFollow(0)) {
         delay(1);
+
         if ((millis() - start_of_while) > 5000 ) {
-          bwf_found = false;
           bwf_start_signal = 0;
-          Serial.println("Timeout");
-        return;
+          return;
         }
       }
-      Serial.println(F("Turn right done"));
     }
     Mower.stop();
     Serial.println(F("BWF centered"));
     delay(500);
-    Mower.runForwardOverTime(SLOWSPEED, MOWING_SPEED, ACCELERATION_DURATION);
     state = DOCKING;
     time_at_turning = millis();
     return;
@@ -662,8 +613,6 @@ void loop() {
 
   static long lastDisplayUpdate = 0;
   static int previousState;
-
-  //long looptime = millis(); // Unused?
 
 #if DEBUG_ENABLED
   if((state = SetupAndDebug.tryEnterSetupDebugMode(state)) == SETUP_DEBUG)

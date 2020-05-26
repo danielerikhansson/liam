@@ -45,7 +45,7 @@ int BWFSENSOR::outside_code[] = {OUTSIDE_BWF, INSIDE_BWF - OUTSIDE_BWF, OUTSIDE_
 int BWFSENSOR::inside_code[] = {INSIDE_BWF, INSIDE_BWF};
 
 int BWFSENSOR::follow_outside_code[] = {FOLLOW_BWF_OUTSIDE, FOLLOW_BWF_INSIDE - FOLLOW_BWF_OUTSIDE, FOLLOW_BWF_OUTSIDE, FOLLOW_BWF_INSIDE - FOLLOW_BWF_OUTSIDE };
-int BWFSENSOR::follow_inside_code[] = {FOLLOW_BWF_INSIDE, FOLLOW_BWF_INSIDE};
+int BWFSENSOR::follow_inside_code[] = {FOLLOW_BWF_INSIDE, FOLLOW_BWF_INSIDE, FOLLOW_BWF_INSIDE, FOLLOW_BWF_INSIDE};
 
 
 BWFSENSOR::BWFSENSOR(int selA, int selB) {
@@ -68,7 +68,6 @@ void BWFSENSOR::selectNext() {
     return;
   }
   if (signal_status != NOSIGNAL) {
-    //Serial.println("Got signal");
     select((_currentSensor + 1) % NUMBER_OF_SENSORS);
     return;
   }
@@ -86,10 +85,8 @@ void BWFSENSOR::SetManualSensorSelect(bool useManualMode){
 
 // Select active sensor
 void BWFSENSOR::select(int sensornumber) {
-  //Serial.print("Selecting sensor: ");
-  //Serial.println(sensornumber);
 
-   if (_currentSensor == sensornumber) {
+  if (_currentSensor == sensornumber) {
     return;
   }
   _switching = true;

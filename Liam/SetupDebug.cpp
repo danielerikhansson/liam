@@ -107,7 +107,9 @@ int SETUPDEBUG::tryEnterSetupDebugMode(int currentState) {
     case 'b':
     case 'B':
       return LOOKING_FOR_BWF;
-
+    case 'e':
+    case 'E':
+      return LAUNCHING;
     case 'a':
     case 'A':
       SETUPDEBUG::trimpotAdjust();
@@ -137,6 +139,7 @@ void SETUPDEBUG::printHelp() {
   Serial.println(F("A = Trimpot adjust mode"));
   Serial.println(F("M = Start mowing"));
   Serial.println(F("B = Look for BWF and dock"));
+  Serial.println(F("E = Launching"));
 }
 
 void SETUPDEBUG::toggleLed() {

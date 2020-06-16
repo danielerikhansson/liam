@@ -410,6 +410,7 @@ void doDocking() {
   if( Battery.isBeingCharged() ) {
     Mower.stop();
     state = CHARGING;
+    Sensor.SetManualSensorSelect(false);
     return;
   }
   int bwf_current_state = 0;
@@ -593,7 +594,7 @@ void doCharging() {
 #endif
     ) {
     // Don't launch if no BWF signal is present
-    if(Sensor.isInside(0) || Sensor.isOutside(0)) {
+    if(Sensor.isInsideFollow(0) || Sensor.isOutsideFollow(0)) {
       state = LAUNCHING;
       return;
     }

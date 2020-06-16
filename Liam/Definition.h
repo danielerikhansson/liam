@@ -34,7 +34,7 @@
 #define NIMH       1
 #define LIION      2
 
-#define BATTERY_TYPE LEAD_ACID
+#define BATTERY_TYPE LIION
 
 #define DEBUG_ENABLED true
 
@@ -105,7 +105,7 @@ const int IDLE = 6;
 #define OUTSIDE_BWF         5
 
 // BWF to follow home
-#define FOLLOW_BWF_INSIDE   170
+#define FOLLOW_BWF_INSIDE   171
 #define FOLLOW_BWF_OUTSIDE  5
 
 #pragma endregion BWF

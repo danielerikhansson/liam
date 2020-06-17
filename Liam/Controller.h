@@ -69,6 +69,7 @@ class CONTROLLER {
     int turnRight(int degrees);
     void turnLeftVoid(void);
     void turnRightVoid(void);
+    void CONTROLLER::randomTurn(bool goBack);
 
   private:
     WHEELMOTOR* leftMotor;

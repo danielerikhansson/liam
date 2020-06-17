@@ -123,10 +123,27 @@ void CONTROLLER::turnLeftVoid() {
     return;
 }
 
+void CONTROLLER::randomTurn(bool goBack) {
+  if(goBack) {
+    stop();
+    runBackward(FULLSPEED);
+    delay(2000);
+  }
+
+  int angle = random(90, 160);
+  if (random(0, 100) % 2 == 0) {
+    turnRight(angle);
+  } else {
+    turnLeft(angle);
+  }
+  time_at_turning = millis();
+  compass->setNewTargetHeading();
+  runForward(MOWING_SPEED);
+}
+
 
 
 int CONTROLLER::waitWhileChecking(int duration) {
-
   delay(200);   // Let any current spikes settle
 
   for (int i=0; i<duration/30; i++) {

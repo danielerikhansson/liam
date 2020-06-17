@@ -7,6 +7,15 @@
 */
 
 /*
+ *  TODO:
+ *  Reduce the pulse interval for bwf_follow. The timers are drifting and it does not reliably find the follow bwf.
+ *  Remove everything that is unneccesary. Make it your own. Speed it up.
+ *  Make sure it can find home reliably.
+ * Add one more sensor (3), and make sure the middle makes random turns when it is outside.
+ */
+
+
+/*
    Welcome to the Liam5_1 program
    This program will control your mower and relies on a two coil
    configuration (0 and 1) with an optional (2).
@@ -41,9 +50,7 @@
   ---------------------------------------------------------------
 */
 
-//#include <Servo.h> // Unused?
 #include <Wire.h>
-#include <LiquidCrystal_I2C.h>
 #include <I2Cdev.h>
 #include "RTClib.h"
 #include "HMC5883L.h"
@@ -53,7 +60,6 @@
 #include "CutterMotor.h"
 #include "BWFSensor.h"
 #include "Controller.h"
-#include "myLcd.h"
 #include "Clock.h"
 #include "Error.h"
 #include "MotionSensor.h"
@@ -187,10 +193,10 @@ void setup() {
   Serial.begin(115200);
 #endif
 
-// set prescaler of ADC to 16
-//  sbi(ADCSRA, ADPS2);
-//  cbi(ADCSRA, ADPS1);
-//  cbi(ADCSRA, ADPS0);
+// set prescaler of ADC to 64
+  sbi(ADCSRA, ADPS2) ;
+  sbi(ADCSRA, ADPS1) ;
+  cbi(ADCSRA, ADPS0) ;
 
   // Configure all the pins for input or output
   Defaults.definePinsInputOutput();
@@ -224,9 +230,9 @@ void setup() {
   Serial.println(F("Send D to enter setup and debug mode"));
   #endif
   delay(5000);
-  #if DEBUG_ENABLED
+#if DEBUG_ENABLED
   state = SetupAndDebug.tryEnterSetupDebugMode(0);
-  #endif
+#endif
   Display.clear();
 
   if (state != SETUP_DEBUG) {
@@ -237,27 +243,7 @@ void setup() {
       state = MOWING;
     }
   }
-// state = IDLE;
 } // setup.
-
-// TODO: This should probably be in Controller
-void randomTurn(bool goBack) {
-  if(goBack) {
-    Mower.stop();
-    Mower.runBackward(FULLSPEED);
-    delay(2000);
-  }
-
-  int angle = random(90, 160);
-  if (random(0, 100) % 2 == 0) {
-    Mower.turnRight(angle);
-  } else {
-    Mower.turnLeft(angle);
-  }
-  time_at_turning = millis();
-  Compass.setNewTargetHeading();
-  Mower.runForward(MOWING_SPEED);
-}
 
 
 // ***************** SAFETY CHECKS ***********************************
@@ -358,7 +344,8 @@ void doMowing() {
 
   // Make regular turns to avoid getting stuck on things
   if ((millis() - time_at_turning) > TURN_INTERVAL) {
-    randomTurn(true);
+    Mower.randomTurn(true);
+    time_at_turning = millis();
     return;
   }
 
@@ -396,9 +383,6 @@ void doLaunching() {
 
 // ***************** DOCKING *****************************************
 void doDocking() {
-//  static int collisionCount = 0;
-//  static long lastCollision = 0;
-
   static long bwf_last_switch = 0;
   static int bwf_last_state = 0;
 
@@ -425,7 +409,6 @@ void doDocking() {
     bwf_last_switch = millis();
   }
 
-
     // If no switch has occoured for a while, we have probably lost the bwf.
   if( (millis() - bwf_last_switch) > DOCKING_INSIDE_TIMEOUT ) {
     Mower.stop();
@@ -436,43 +419,6 @@ void doDocking() {
     time_at_turning = millis();
     return;
   }
-
-  // If the mower hits something along the BWF
-  // Don't use this right now to simplify
-//  if(Mower.wheelsAreOverloaded()) {
-//    if(millis() - lastCollision > 10000)
-//      collisionCount = 0;
-//    collisionCount++;
-//    lastCollision = millis();
-//
-//    // Serial.print("Collision while docking: ");
-//    // Serial.println(collisionCount);
-//    Mower.stop();
-//    // Let it run for a bit and check if we hit the charger
-//    delay(1000);
-//    if(Battery.isBeingCharged()) {
-//      Mower.stop();
-//      state = CHARGING;
-//      return;
-//    }
-//
-//    // Go back a bit and try again
-//    Mower.runBackward(DOCKING_WHEEL_HIGH_SPEED);
-//    delay(1300);
-//    Mower.stop();
-//    Mower.runForward(DOCKING_WHEEL_HIGH_SPEED);
-//
-//    // After third try. Try to go around obstacle
-//    if(collisionCount >= 3) {
-//      Mower.turnRight(70);
-//      Mower.stop();
-//      collisionCount = 0;
-//      Mower.runForward(DOCKING_WHEEL_HIGH_SPEED);
-//    }
-//    //time_at_turning = millis();
-//    return;
-//  }
-
 
   // Track the BWF by compensating the wheel motor speeds
   Mower.adjustMotorSpeeds(Sensor.isOutsideFollow(0));
@@ -556,7 +502,8 @@ void doLookForBWF() {
 
   // Make regular turns to avoid getting stuck on things
   if ((millis() - time_at_turning) > TURN_INTERVAL) {
-    randomTurn(true);
+    Mower.randomTurn(true);
+    time_at_turning = millis();
     return;
   }
 
@@ -601,21 +548,10 @@ void doCharging() {
   }
 }
 
-//void awareDelay(int ms) {
-//  unsigned long exitAt = millis() + ms;
-//  int sensor = Sensor.getCurrentSensor();
-//  while (millis() < exitAt) {
-//    Sensor.select(sensor % NUMBER_OF_SENSORS);
-//    Sensor.sensorOutside[Sensor.getCurrentSensor()] = Sensor.isOutOfBounds();
-//  }
-//}
 // ***************** MAIN LOOP ***************************************
 void loop() {
-
-  static long lastDisplayUpdate = 0;
-  static int previousState;
-
 #if DEBUG_ENABLED
+  static long lastDisplayUpdate = 0;
   if((state = SetupAndDebug.tryEnterSetupDebugMode(state)) == SETUP_DEBUG)
     return;
 #endif
@@ -647,9 +583,10 @@ void loop() {
       doWait();
       break;
   }
-
+#if DEBUG_ENABLED
   if(millis()-lastDisplayUpdate > 10000) {
     Display.update();
     lastDisplayUpdate = millis();
   }
+#endif
 }

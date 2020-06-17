@@ -90,8 +90,12 @@ void BWFSENSOR::select(int sensornumber) {
     return;
   }
   _switching = true;
-  digitalWrite(selpin_A, (sensornumber & 1) > 0 ? HIGH : LOW);
-  digitalWrite(selpin_B, (sensornumber & 2) > 0 ? HIGH : LOW);
+
+  (sensornumber & 1) > 0 ? sbi(PORTD, selpin_A) : cbi(PORTD, selpin_A);
+  (sensornumber & 2) > 0 ? sbi(PORTD, selpin_B) : cbi(PORTD, selpin_B);
+
+//  digitalWrite(selpin_A, (sensornumber & 1) > 0 ? HIGH : LOW);
+//  digitalWrite(selpin_B, (sensornumber & 2) > 0 ? HIGH : LOW);
   _currentSensor = sensornumber;
   clearSignal();
   lastSwitch = millis();
@@ -240,12 +244,15 @@ void BWFSENSOR::readSensor() {
 
 void BWFSENSOR::assignIfNeeded(int sensor, int signalStatus) {
   if (sensorValue[sensor] != signalStatus) {
-    sensorValue[_currentSensor] = signalStatus;
+    sensorValue[sensor] = signalStatus; // changed from _currentSensor
     //Signal change here if needed
+
+ #if DEBUG_ENABLED
     Serial.print(F("Sensor "));
     Serial.print(sensor);
     Serial.print(F(" "));
     Serial.println(getSignalStatusName(signalStatus));
+#endif
   }
 }
 

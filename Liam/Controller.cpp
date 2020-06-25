@@ -348,8 +348,7 @@ void CONTROLLER::turnIfObstacle() {
 
     if (random(0, 100) % 2 == 0) {
       turnRight(angle);
-    }
-    else {
+    } else {
       turnLeft(angle);
     }
     stop();

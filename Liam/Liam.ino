@@ -283,7 +283,7 @@ void checkIfLifted() {
 
 void checkIfOutside() {
     // Check if any sensor is outside
-  for(int i = 0; i < 2; i++) {
+  for(int i = 0; i < NUMBER_OF_SENSORS; i++) {
     // If sensor is inside, check next
     if(!Sensor.isOutOfBounds(i)) {
       continue;
@@ -300,17 +300,23 @@ void checkIfOutside() {
 
       if (millis() - time_at_turning < 3000) {
         extraTurnAngle = extraTurnAngle + 10;
-      }
-      else {
+      } else {
         extraTurnAngle = 0;
       }
       int turnAngle = 90 + extraTurnAngle ;
 
     // Try to turn away from BWF
-    if(i == 0)
+    if(i == 0) {
       err = Mower.turnToReleaseRight(turnAngle);
-    else
+    } else if(i == 1) {
       err = Mower.turnToReleaseLeft(turnAngle);
+    } else {
+      if (random(0, 100) % 2 == 0) {
+        err = Mower.turnToReleaseRight(turnAngle);
+      } else {
+        err = Mower.turnToReleaseLeft(turnAngle);
+      }
+    }
 
     if(err) {
       // If turning failed, reverse and try once more
@@ -318,10 +324,17 @@ void checkIfOutside() {
       delay(1000);
       Mower.stop();
 
-      if(i == 0)
+      if(i == 0) {
         err = Mower.turnToReleaseRight(turnAngle);
-      else
+      } else if (i == 1) {
         err = Mower.turnToReleaseLeft(turnAngle);
+      } else {
+        if (random(0, 100) % 2 == 0) {
+          err = Mower.turnToReleaseRight(turnAngle);
+        } else {
+          err = Mower.turnToReleaseLeft(turnAngle);
+        }
+      }
 
       if (err && err != ERROR_OVERLOAD) {
         Error.flag(err);
@@ -387,7 +400,7 @@ void doDocking() {
   static int bwf_last_state = 0;
 
   Sensor.SetManualSensorSelect(true);
-  Sensor.select(0);
+  Sensor.select(2);
 
   Mower.stopCutter();
 
@@ -398,9 +411,9 @@ void doDocking() {
     return;
   }
   int bwf_current_state = 0;
-  if( Sensor.isOutsideFollow(0) ) {
+  if( Sensor.isOutsideFollow(2) ) {
     bwf_current_state = FOLLOW_OUTSIDE;
-  } else if( Sensor.isInsideFollow(0) ) {
+  } else if( Sensor.isInsideFollow(2) ) {
     bwf_current_state = FOLLOW_INSIDE;
   }
 
@@ -421,12 +434,12 @@ void doDocking() {
   }
 
   // Track the BWF by compensating the wheel motor speeds
-  Mower.adjustMotorSpeeds(Sensor.isOutsideFollow(0));
+  Mower.adjustMotorSpeeds(Sensor.isOutsideFollow(2));
 }
 void doWait()
 {
   char buf[30];
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < NUMBER_OF_SENSORS; i++)
   {
     // only here for debug purpose
     // If sensor is inside, don't do anything
@@ -447,15 +460,15 @@ void doLookForBWF() {
   Mower.runForward(MOWING_SPEED);
 
   // If sensor is outside or inside, then the BWF has been found
-  if(Sensor.isOutsideFollow(0) || Sensor.isInsideFollow(0)) {
+  if(Sensor.isOutsideFollow(2) || Sensor.isInsideFollow(2)) {
     Serial.print(F("BWF found: "));
-    bwf_start_signal = Sensor.getSensorValue(0);
+    bwf_start_signal = Sensor.getSensorValue(2);
     Serial.println(bwf_start_signal);
 
 
 // Wait to cross the bwf.
     long start_of_while = millis();
-    while(Sensor.getSensorValue(0) == bwf_start_signal) {
+    while(Sensor.getSensorValue(2) == bwf_start_signal) {
 
       if ((millis() - start_of_while) > 5000 ) {
         bwf_start_signal = 0;
@@ -472,7 +485,7 @@ void doLookForBWF() {
     if ( bwf_start_signal == FOLLOW_OUTSIDE ) {
       Serial.println(F("Turn right"));
       Mower.turnRightVoid();
-      while(Sensor.isInsideFollow(0)) {
+      while(Sensor.isInsideFollow(2)) {
         delay(1);
 
         if ((millis() - start_of_while) > 5000 ) {
@@ -483,7 +496,7 @@ void doLookForBWF() {
     } else {
       Serial.println(F("Turn left"));
       Mower.turnLeftVoid();
-      while(Sensor.isOutsideFollow(0)) {
+      while(Sensor.isOutsideFollow(2)) {
         delay(1);
 
         if ((millis() - start_of_while) > 5000 ) {
@@ -541,7 +554,7 @@ void doCharging() {
 #endif
     ) {
     // Don't launch if no BWF signal is present
-    if(Sensor.isInsideFollow(0) || Sensor.isOutsideFollow(0)) {
+    if(Sensor.isInsideFollow(2) || Sensor.isOutsideFollow(2)) {
       state = LAUNCHING;
       return;
     }

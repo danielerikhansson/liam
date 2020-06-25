@@ -42,7 +42,10 @@
 #include "BWFSensor.h"
 
 int BWFSENSOR::outside_code[] = {OUTSIDE_BWF, INSIDE_BWF - OUTSIDE_BWF, OUTSIDE_BWF, INSIDE_BWF - OUTSIDE_BWF };
-int BWFSENSOR::inside_code[] = {INSIDE_BWF, INSIDE_BWF};
+int BWFSENSOR::inside_code[] = {INSIDE_BWF, INSIDE_BWF, INSIDE_BWF, INSIDE_BWF};
+
+int BWFSENSOR::follow_outside_code[] = {FOLLOW_BWF_OUTSIDE, FOLLOW_BWF_INSIDE - FOLLOW_BWF_OUTSIDE, FOLLOW_BWF_OUTSIDE, FOLLOW_BWF_INSIDE - FOLLOW_BWF_OUTSIDE };
+int BWFSENSOR::follow_inside_code[] = {FOLLOW_BWF_INSIDE, FOLLOW_BWF_INSIDE, FOLLOW_BWF_INSIDE, FOLLOW_BWF_INSIDE};
 
 
 BWFSENSOR::BWFSENSOR(int selA, int selB) {
@@ -65,7 +68,6 @@ void BWFSENSOR::selectNext() {
     return;
   }
   if (signal_status != NOSIGNAL) {
-    //Serial.println("Got signal");
     select((_currentSensor + 1) % NUMBER_OF_SENSORS);
     return;
   }
@@ -83,15 +85,17 @@ void BWFSENSOR::SetManualSensorSelect(bool useManualMode){
 
 // Select active sensor
 void BWFSENSOR::select(int sensornumber) {
-  //Serial.print("Selecting sensor: ");
-  //Serial.println(sensornumber);
 
-   if (_currentSensor == sensornumber) {
+  if (_currentSensor == sensornumber) {
     return;
   }
   _switching = true;
-  digitalWrite(selpin_A, (sensornumber & 1) > 0 ? HIGH : LOW);
-  digitalWrite(selpin_B, (sensornumber & 2) > 0 ? HIGH : LOW);
+
+  (sensornumber & 1) > 0 ? sbi(PORTD, selpin_A) : cbi(PORTD, selpin_A);
+  (sensornumber & 2) > 0 ? sbi(PORTD, selpin_B) : cbi(PORTD, selpin_B);
+
+//  digitalWrite(selpin_A, (sensornumber & 1) > 0 ? HIGH : LOW);
+//  digitalWrite(selpin_B, (sensornumber & 2) > 0 ? HIGH : LOW);
   _currentSensor = sensornumber;
   clearSignal();
   lastSwitch = millis();
@@ -109,12 +113,29 @@ void BWFSENSOR::clearSignal() {
 }
 
 
+int BWFSENSOR::getSensorValue(int sensornumber) {
+  return sensorValue[sensornumber];
+}
+
 bool BWFSENSOR::isInside(int sensornumber) {
   return (sensorValue[sensornumber] == INSIDE);
 }
 
 bool BWFSENSOR::isOutside(int sensornumber) {
   return (sensorValue[sensornumber] == OUTSIDE);
+}
+
+
+bool BWFSENSOR::isInsideFollow(int sensornumber) {
+  return (sensorValue[sensornumber] == FOLLOW_INSIDE);
+}
+
+bool BWFSENSOR::isOutsideFollow(int sensornumber) {
+  return (sensorValue[sensornumber] == FOLLOW_OUTSIDE);
+}
+
+int BWFSENSOR::getLastKnownSensorValue(int sensornumber) {
+  return lastKnownSensorValue[sensornumber];
 }
 
 bool BWFSENSOR::isOutOfBounds(int sensornumber) {
@@ -158,6 +179,7 @@ void BWFSENSOR::readSensor() {
     // Check if the entire pulse train has been batched
     if (pulse_count_inside >= sizeof(inside_code)/sizeof(inside_code[0])) {
       signal_status = INSIDE;
+      lastKnownSensorValue[_currentSensor] = INSIDE;
       assignIfNeeded(_currentSensor, signal_status);
       last_match = millis();
       pulse_count_inside=0;
@@ -172,15 +194,44 @@ void BWFSENSOR::readSensor() {
 
     if (pulse_count_outside >= sizeof(outside_code)/sizeof(outside_code[0])) {
       signal_status = OUTSIDE;
+      lastKnownSensorValue[_currentSensor] = OUTSIDE;
       assignIfNeeded(_currentSensor, signal_status);
       last_match = millis();
       pulse_count_outside=0;
     }
   } else {
     pulse_count_outside=0;
-
   }
 
+// FOLLOW LINE
+
+  // Check if the latest pulse fits the code for inside
+  if (abs(pulse_length - follow_inside_code[pulse_count_follow_inside]) < 2) {
+    pulse_count_follow_inside++;
+
+    if (pulse_count_follow_inside >= sizeof(follow_inside_code)/sizeof(follow_inside_code[0])) {
+      signal_status = FOLLOW_INSIDE;
+      assignIfNeeded(_currentSensor, signal_status);
+      last_match = millis();
+      pulse_count_follow_inside = 0;
+    }
+  } else {
+    pulse_count_follow_inside = 0;
+  }
+
+  // Check if the latest pulse fits the code for outside
+  if (abs(pulse_length - follow_outside_code[pulse_count_follow_outside]) < 2) {
+    pulse_count_follow_outside++;
+
+    if (pulse_count_follow_outside >= sizeof(follow_outside_code)/sizeof(follow_outside_code[0])) {
+      signal_status = FOLLOW_OUTSIDE;
+      assignIfNeeded(_currentSensor, signal_status);
+      last_match = millis();
+      pulse_count_follow_outside=0;
+    }
+  } else {
+    pulse_count_follow_outside=0;
+  }
 
 #if DEBUG_ENABLED
   // Store the received code for debug output
@@ -193,13 +244,16 @@ void BWFSENSOR::readSensor() {
 
 void BWFSENSOR::assignIfNeeded(int sensor, int signalStatus) {
   if (sensorValue[sensor] != signalStatus) {
-    sensorValue[_currentSensor] = signalStatus;
+    sensorValue[sensor] = signalStatus; // changed from _currentSensor
     //Signal change here if needed
+
+ #if DEBUG_ENABLED
     Serial.print(F("Sensor "));
     Serial.print(sensor);
     Serial.print(F(" "));
     Serial.println(getSignalStatusName(signalStatus));
-  };
+#endif
+  }
 }
 
 String BWFSENSOR::getSignalStatusName(int signalStatus) {
@@ -212,6 +266,10 @@ String BWFSENSOR::getSignalStatusName(int signalStatus) {
     return F("Outside");
   case NOSIGNAL:
     return F("No signal");
+  case FOLLOW_INSIDE:
+    return F("Inside_follow");
+  case FOLLOW_OUTSIDE:
+    return F("Outside_follow");
   default:
     return F("UNKNOWN");
   }

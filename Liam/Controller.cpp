@@ -111,9 +111,39 @@ int CONTROLLER::turnLeft(int angle) {
 }
 
 
+void CONTROLLER::turnRightVoid() {
+    int l = leftMotor->setSpeedOverTime(default_dir_fwd * 50, 0);
+    int r = rightMotor->setSpeedOverTime(-1 * default_dir_fwd * 50, 0);
+    return;
+}
+
+void CONTROLLER::turnLeftVoid() {
+    int l = leftMotor->setSpeedOverTime(-1 * default_dir_fwd * 50, 0);
+    int r = rightMotor->setSpeedOverTime(default_dir_fwd * 50, 0);
+    return;
+}
+
+void CONTROLLER::randomTurn(bool goBack) {
+  if(goBack) {
+    stop();
+    runBackward(FULLSPEED);
+    delay(2000);
+  }
+
+  int angle = random(90, 160);
+  if (random(0, 100) % 2 == 0) {
+    turnRight(angle);
+  } else {
+    turnLeft(angle);
+  }
+  time_at_turning = millis();
+  compass->setNewTargetHeading();
+  runForward(MOWING_SPEED);
+}
+
+
 
 int CONTROLLER::waitWhileChecking(int duration) {
-
   delay(200);   // Let any current spikes settle
 
   for (int i=0; i<duration/30; i++) {
@@ -225,7 +255,7 @@ void CONTROLLER::adjustMotorSpeeds(bool isOutOfBounds) {
   int shortTime = DOCKING_TIME_TO_HIGH_SPEED;
   int longTime = DOCKING_TIME_TO_SLOW_SPEED;
 
-  if (isOutOfBounds) {
+  if (!isOutOfBounds) {
 	  //Serial.println("Adjust to out of bounds");
     lms = highSpeed;
 	ltime = shortTime;
@@ -318,8 +348,7 @@ void CONTROLLER::turnIfObstacle() {
 
     if (random(0, 100) % 2 == 0) {
       turnRight(angle);
-    }
-    else {
+    } else {
       turnLeft(angle);
     }
     stop();

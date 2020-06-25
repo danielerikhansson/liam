@@ -34,7 +34,7 @@
 #define NIMH       1
 #define LIION      2
 
-#define BATTERY_TYPE LEAD_ACID
+#define BATTERY_TYPE LIION
 
 #define DEBUG_ENABLED true
 
@@ -42,7 +42,7 @@
 #define cbi(sfr, bit) (_SFR_BYTE(sfr) &= ~_BV(bit))
 #define sbi(sfr, bit) (_SFR_BYTE(sfr) |= _BV(bit))
 
-const int NUMBER_OF_SENSORS = 2;  // Number of BWF sensors can be 1-4 depending on shield default 2 left and right front.
+const int NUMBER_OF_SENSORS = 3;  // Number of BWF sensors can be 1-4 depending on shield default 2 left and right front.
 
 // Pin setup following Morgan 1.5 shield and up
 #define WHEEL_MOTOR_A_CURRENT_PIN       0
@@ -101,15 +101,19 @@ const int IDLE = 6;
 #define BWF_NUMBER_OF_PULSES  3
 
 // BWF Code for inside and outside
-#define INSIDE_BWF          86
+#define INSIDE_BWF          85
 #define OUTSIDE_BWF         5
+
+// BWF to follow home
+#define FOLLOW_BWF_INSIDE   69
+#define FOLLOW_BWF_OUTSIDE  5
 
 #pragma endregion BWF
 
 
 #define MAJOR_VERSION           5
 #define MINOR_VERSION_1         4
-#define MINOR_VERSION_2         0
+#define MINOR_VERSION_2         1
 
 // A bit of macro magic to make a string out of the version number
 // The preprocessor works in mysterious ways...
@@ -145,9 +149,10 @@ const int IDLE = 6;
 #define FLIPANGLE           75
 
 // Motor Speeds
-#define MOWING_SPEED 100
-#define FULLSPEED 100
-#define SLOWSPEED           30
+#define MOWING_SPEED          100
+#define FULLSPEED             100
+#define MEDIUM_SPEED          70
+#define SLOWSPEED             30
 #define CUTTERSPEED           100
 #define ACCELERATION_DURATION 400
 
@@ -162,10 +167,10 @@ const int IDLE = 6;
 
 
 //Settings for docking behavour. Alter these to adapt to your mower behavour at docking time
-#define DOCKING_WHEEL_HIGH_SPEED 100                //Speed for the fast wheel when downing
+#define DOCKING_WHEEL_HIGH_SPEED 90                //Speed for the fast wheel when docking
 #define DOCKING_WHEEL_LOW_SPEED 30                  //Speed for the slower wheel when docking
-#define DOCKING_TIME_TO_SLOW_SPEED 0             //Time used for the slower wheel to slow down to its target speed
-#define DOCKING_TIME_TO_HIGH_SPEED 0               //Time used for the fast wheel to speed up to its target speed
+#define DOCKING_TIME_TO_SLOW_SPEED 0             //Time used for the slower wheel to slow down to its target speed: original 1000
+#define DOCKING_TIME_TO_HIGH_SPEED 0               //Time used for the fast wheel to speed up to its target speed: original 10
 #define DOCKING_INSIDE_TIMEOUT 10000                //Time to spend continously on the inside of the BWF before restarting state LOOK_FOR_BWF
 #define DOCKING_TURN_AFTER_TIMEOUT 30               //Angle to turn inside-timeout has occurred and the mower is about to start looking for BWF.
 #define DOCKING_BACK_WHEN_INNER_SENSOR_IS_OUT false //Should the mower back up a little when the inner sensor is out of bounds. Otherwise just turn right on the spot.

@@ -251,7 +251,7 @@ void setup() {
 
 // ***************** SAFETY CHECKS ***********************************
 void checkIfFlipped() {
-#if defined __MS9150__ || defined __MS5883L__ || __ADXL345__
+#if defined __MS9150__ || defined __MS5883L__ || __ADXL345__ || __MS6050__
 //Serial.println("FlipSensor Defined");
   if (Mower.hasFlipped()) {
     Serial.print("Mower has flipped ");

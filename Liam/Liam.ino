@@ -268,7 +268,7 @@ void randomTurn(bool goBack) {
 // ***************** SAFETY CHECKS ***********************************
 void checkIfFlipped() {
 #if defined __MS9150__ || defined __MS5883L__ || __ADXL345__
-Serial.println("FlipSensor Defined");
+//Serial.println("FlipSensor Defined");
   if (Mower.hasFlipped()) {
     Serial.print("Mower has flipped ");
     Mower.stopCutter();

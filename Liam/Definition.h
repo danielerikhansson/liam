@@ -105,7 +105,7 @@ const int IDLE = 6;
 #define OUTSIDE_BWF         5
 
 // BWF to follow home
-#define FOLLOW_BWF_INSIDE   171
+#define FOLLOW_BWF_INSIDE   69
 #define FOLLOW_BWF_OUTSIDE  5
 
 #pragma endregion BWF

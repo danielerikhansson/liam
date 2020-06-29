@@ -27,6 +27,9 @@ class MS6050 : public MOTIONSENSOR{
     virtual int getXAngle();
     virtual int getYAngle();
     virtual int getZAngle();
+
+    int tiltxz_filter;
+    int tiltyz_filter;
 };
 
 #endif /* _MS6050_H_ */

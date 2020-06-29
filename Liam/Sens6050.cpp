@@ -20,6 +20,8 @@ boolean MS6050::initialize() {
   sensor.Calibrate();
   
   current_heading = getHeading();
+  tiltxz_filter = 0;
+  tiltyz_filter = 0;
 
   return true;
 }
@@ -51,10 +53,13 @@ int MS6050::getTiltAngle() {
   int tiltxz = abs(sensor.GetAngAccX());
   int tiltyz = abs(sensor.GetAngAccY());
 
-  if (tiltxz > tiltyz)
-    return tiltxz;
+  tiltxz_filter = 0.9 * tiltxz_filter + 0.1 * tiltxz;
+  tiltyz_filter = 0.9 * tiltyz_filter + 0.1 * tiltyz;
+
+  if (tiltxz_filter > tiltyz_filter)
+    return tiltxz_filter;
   else
-    return tiltyz;
+    return tiltyz_filter;
 }
 
 int MS6050::getZAngle(){
